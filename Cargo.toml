@@ -1,0 +1,25 @@
+[package]
+name = "red"
+version = "0.1.0"
+authors = ["Alex Biehl <alexbiehl@gmail.com>"]
+edition = "2018"
+license = "MIT"
+
+[build-dependencies]
+tonic-build = "0.1.1"
+
+[dependencies]
+async-std = "1.5.0"
+async-trait = "0.1.24"
+rand = "0.7.3"
+tonic = "0.1.1"
+prost = "0.6.1"
+tokio = { version = "0.2.16", features = ["rt-threaded", "time", "stream", "fs", "macros", "uds", "process", "io-std"] }
+futures = "0.3.4"
+slog = { version = "2.5.2", features = ["max_level_info", "release_max_level_info"] }
+sloggers = "0.3.5"
+serde = { version = "1.0.104", features = ["derive"] }
+serde_cbor = "0.11.1"
+redis = "0.15.1"
+avro-rs = "0.7.0"
+bytes = "0.5.4"

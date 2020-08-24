@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package red.grpc_backend.protocol;
+
+message Empty {}
+
+message Address {
+    uint32 port = 2; // Protobuf doesn't support uint16
+    bytes host = 1;
+}
+
+message BatchId {
+    Address scheduler = 1;
+    uint64 id = 2;
+}
+
+message TaskId {
+    BatchId batch_id = 1;
+    uint64 local_id = 2;
+}
+
+message RedeemTicketRequest {
+    Address executor_address = 1;
+    BatchId batch_id = 2;
+}
+
+message SpawnTask {
+    TaskId task_id = 1;
+    bytes task = 2;
+}
+
+message TicketExpired {}
+
+message RedeemTicketResponse {
+    oneof redeem_response {
+        SpawnTask spawn_task = 1;
+        TicketExpired ticket_expired = 2;
+    }
+}
+
+message DecodeTaskError {}
+
+message CompleteTaskRequest {
+    Address executor_address = 1;
+    TaskId task_id = 2;
+    oneof result {
+        bytes encoded_result = 3;
+        string error_message = 4;
+        DecodeTaskError decode_task_error = 5;
+    };
+    BatchId next_redeem = 6;
+    // TODO metrics
+}
+
+message CompleteTaskResponse {
+    SpawnTask spawn_task = 1;
+}
+
+message NewTicketRequest {
+    BatchId batch_id = 1;
+}
+
+message RegisterRequest {
+    Address executor_address = 1;
+}
+
+message StatusUpdateRequest {
+    // Scheduler that requests status updates
+    Address scheduler = 1;
+    // Sending interval in seconds.
+    uint64 interval_seconds = 2;
+}
+
+message StatusUpdateResponse {
+    uint64 total_queued_tickets = 1;
+    uint64 total_redeems = 2;
+    uint64 total_expired_tickets = 3;
+    uint64 total_successful_tasks = 4;
+    uint64 total_failed_tasks = 5;
+    uint64 total_found_empty_queue = 6;
+}
+
+service ExecutorService {
+    rpc NewTicket(NewTicketRequest) returns (Empty) {}
+
+    rpc StatusUpdate(StatusUpdateRequest) returns (stream StatusUpdateResponse) {}
+}
+
+
+service SchedulerBackend {
+    // TODO support constraints, labels etc.
+    rpc Register(RegisterRequest) returns (Empty) {}
+
+    rpc RedeemTicket(RedeemTicketRequest) returns (RedeemTicketResponse) {}
+
+    rpc CompleteTask(CompleteTaskRequest) returns (CompleteTaskResponse) {}
+}

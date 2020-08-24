@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package redpy.protocol;
+
+// Messages from Python code to Redpy
+message Input {
+    oneof input {
+        // Sent from Python code to Redpy to schedule and run a task
+        SpawnTask spawn_task = 1;
+        // Sent from Python code to redpy when a task has finished
+        TaskResult task_result = 2;
+    }
+}
+
+
+// Messages from Redpy to Python code
+message Output {
+    oneof output {
+        // Sent from redpy to Python code when a task has finished
+        TaskResult task_result = 1;
+        // Sent from redpy to Python code when it should run a task
+        SpawnTask spawn_task = 2;
+    }
+}
+
+
+message SpawnTask {
+    uint64 task_id = 1;
+    bytes serialized_task = 2;
+}
+
+
+message TaskResult {
+    uint64 task_id = 1;
+    oneof result {
+        bytes serialized_result = 2;
+        string error_description = 3;
+    }
+}
